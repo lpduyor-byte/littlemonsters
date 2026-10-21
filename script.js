@@ -137,48 +137,41 @@ $("fanForm").addEventListener("submit", e => {
   e.preventDefault(); e.stopPropagation();
   const form=$("fanForm"); form.classList.add("was-validated");
   if(!form.checkValidity()) return;
+
   const id=$("editId").value;
   const email=$("fanEmail").value.trim().toLowerCase();
   const duplicate=fans.some(f=>f.email.toLowerCase()===email && f.id!==id);
-  if(duplicate){$("fanEmail").setCustomValidity("This email is already registered.");$("fanEmail").reportValidity();$("fanEmail").setCustomValidity("");toast("That email is already registered.");return;}
-  const record={id:id||`${Date.now()}-${Math.random().toString(16).slice(2)}`,name:$("fanName").value.trim(),email,type:$("fanType").value,album:$("favoriteAlbum").value,song:$("favoriteSong").value,era:$("fanSince").value,message:$("fanMessage").value.trim(),createdAt:id?(fans.find(f=>f.id===id)?.createdAt||Date.now()):Date.now()};
-  if(id){
+  if(duplicate){
+    $("fanEmail").setCustomValidity("This email is already registered.");
+    $("fanEmail").reportValidity();
+    $("fanEmail").setCustomValidity("");
+    toast("That email is already registered.");
+    return;
+  }
 
+  const record={
+    id:id||`${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name:$("fanName").value.trim(),
+    email,
+    type:$("fanType").value,
+    album:$("favoriteAlbum").value,
+    song:$("favoriteSong").value,
+    era:$("fanSince").value,
+    message:$("fanMessage").value.trim(),
+    createdAt:id?(fans.find(f=>f.id===id)?.createdAt||Date.now()):Date.now()
+  };
+
+  if(id){
     fans = fans.map(f => f.id === id ? record : f);
     toast("Fan profile updated!");
+  } else {
+    fans.unshift(record);
+    toast("Fan profile saved!");
+  }
 
-}lse {
-
-    addDoc(
-        collection(db, "fans"),
-        {
-            name: record.name,
-            email: record.email,
-            type: record.type,
-            album: record.album,
-            song: record.song,
-            era: record.era,
-            message: record.message,
-            createdAt: Date.now()
-        }
-    )
-    .then(() => {
-
-        fans.unshift(record);
-
-        toast("Saved to Firebase!");
-
-    })
-    .catch((error) => {
-
-        console.log(error);
-
-        alert("Firebase Error");
-
-    });
-
-}
-
+  saveFans();
+  resetForm();
+  renderFans();
 });
 $("cancelEdit").addEventListener("click",resetForm);
 $("searchFan").addEventListener("input",renderFans);

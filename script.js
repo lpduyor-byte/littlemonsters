@@ -147,33 +147,38 @@ $("fanForm").addEventListener("submit", e => {
     fans = fans.map(f => f.id === id ? record : f);
     toast("Fan profile updated!");
 
-}else{
+}lse {
 
-    let formData = new FormData();
+    addDoc(
+        collection(db, "fans"),
+        {
+            name: record.name,
+            email: record.email,
+            type: record.type,
+            album: record.album,
+            song: record.song,
+            era: record.era,
+            message: record.message,
+            createdAt: Date.now()
+        }
+    )
+    .then(() => {
 
-    formData.append("name", record.name);
-    formData.append("email", record.email);
-    formData.append("type", record.type);
-    formData.append("album", record.album);
-    formData.append("song", record.song);
-    formData.append("era", record.era);
+        fans.unshift(record);
 
-    fetch("save_fan.php", {
-        method: "POST",
-        body: formData
+        toast("Saved to Firebase!");
+
     })
-    .then(response => response.text())
-    .then(result => {
-        console.log(result);
+    .catch((error) => {
+
+        console.log(error);
+
+        alert("Firebase Error");
+
     });
 
-    fans.unshift(record);
-    toast("Welcome to the Little Monsters family!");
 }
 
-saveFans();
-renderFans();
-resetForm();
 });
 $("cancelEdit").addEventListener("click",resetForm);
 $("searchFan").addEventListener("input",renderFans);
